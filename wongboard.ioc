@@ -1,5 +1,5 @@
 #MicroXplorer Configuration settings - do not modify
-#Sun May 03 22:31:06 AEST 2015
+#Sun May 03 23:16:27 AEST 2015
 File.Version=5
 KeepUserPlacement=true
 Mcu.Family=STM32F0
