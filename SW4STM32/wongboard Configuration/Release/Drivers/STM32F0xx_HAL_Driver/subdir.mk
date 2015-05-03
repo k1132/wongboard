@@ -4,16 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash_ex.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr_ex.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.c \
-C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc_ex.c 
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash_ex.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr_ex.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc_ex.c 
 
 OBJS += \
 ./Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal.o \
@@ -41,7 +41,7 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -49,7 +49,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal.o: C:/temp/stm32/wongboard/Drivers/ST
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_cortex.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_cortex.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_cortex.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -57,7 +57,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_cortex.o: C:/temp/stm32/wongboard/Dri
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_dma.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_dma.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_dma.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -65,7 +65,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_dma.o: C:/temp/stm32/wongboard/Driver
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -73,7 +73,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash.o: C:/temp/stm32/wongboard/Driv
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash_ex.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash_ex.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash_ex.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_flash_ex.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -81,7 +81,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_flash_ex.o: C:/temp/stm32/wongboard/D
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_gpio.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_gpio.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_gpio.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -89,7 +89,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_gpio.o: C:/temp/stm32/wongboard/Drive
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -97,7 +97,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr.o: C:/temp/stm32/wongboard/Driver
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr_ex.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr_ex.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr_ex.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_pwr_ex.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -105,7 +105,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_pwr_ex.o: C:/temp/stm32/wongboard/Dri
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_rcc.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_rcc.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -113,7 +113,7 @@ Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_rcc.o: C:/temp/stm32/wongboard/Driver
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_rcc_ex.o: C:/temp/stm32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc_ex.c
+Drivers/STM32F0xx_HAL_Driver/stm32f0xx_hal_rcc_ex.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Drivers/STM32F0xx_HAL_Driver/Src/stm32f0xx_hal_rcc_ex.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%

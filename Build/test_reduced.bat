@@ -8,19 +8,26 @@ set SIZE_LOC="C:\Program Files (x86)\GNU Tools ARM Embedded\4.9 2015q1\bin\arm-n
 set OBJCOPY_LOC="C:\Program Files (x86)\GNU Tools ARM Embedded\4.9 2015q1\bin\arm-none-eabi-objcopy.exe"
 
 set HAL_INC="..\Drivers\STM32F0xx_HAL_Driver\Inc"
+set HAL_USB_INC="..\Middlewares\ST\STM32_USB_Device_Library\Core\Inc"
+set HAL_USB_HID_INC="..\Middlewares\ST\STM32_USB_Device_Library\Class\HID\Inc"
 set CMSIS_INC="..\Drivers\CMSIS\Include"
 set DEVICE_INC="..\Drivers\CMSIS\Device\ST\STM32F0xx\Include"
 set STM32CUBE_INC="..\Inc"
+
 
 set LD_PATH="..\SW4STM32\wongboard Configuration\STM32F072RBTx_FLASH.ld"
 set STARTUP_ASM_PATH="..\Drivers\CMSIS\Device\ST\STM32F0xx\Source\Templates\gcc\startup_stm32f072xb.s"
 
 :: make Cflags
-set INCLUDE_ARGS=-I%CMSIS_INC% -I%HAL_INC% -I%STM32CUBE_INC% -I%DEVICE_INC%
+set INCLUDE_ARGS=-I%CMSIS_INC% -I%HAL_INC% -I%STM32CUBE_INC% -I%DEVICE_INC% -I%HAL_USB_INC% -I%HAL_USB_HID_INC%
 set CFLAGS= -DUSE_HAL_DRIVER -DSTM32F072xB -mcpu=cortex-m0 -mthumb -Wall %INCLUDE_ARGS% -ffunction-sections -fdata-sections
 
 :: build HAL library
 %GCC_LOC% %CFLAGS% -c "..\Drivers\STM32F0xx_HAL_Driver\Src\*.c" 
+
+:: build HAL USB library
+%GCC_LOC% %CFLAGS% -c "..\Middlewares\ST\STM32_USB_Device_Library\Core\Src\*.c"
+%GCC_LOC% %CFLAGS% -c "..\Middlewares\ST\STM32_USB_Device_Library\Class\HID\Src\*.c"
 
 :: build system_stm32[...].c and startup[...].s (startup is assembly which defines startup vectors, I am not sure what system_stm32 defines (refer to DM00105879.pdf) 
 %GCC_LOC% %CFLAGS% -c "..\Drivers\CMSIS\Device\ST\STM32F0xx\Source\Templates\system_stm32f0xx.c" %STARTUP_ASM_PATH%
@@ -39,3 +46,5 @@ set CFLAGS= -DUSE_HAL_DRIVER -DSTM32F072xB -mcpu=cortex-m0 -mthumb -Wall %INCLUD
 %SIZE_LOC% main.elf
 
 %OBJCOPY_LOC% -O binary main.elf main.bin
+
+copy main.bin D:\main.bin

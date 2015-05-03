@@ -4,9 +4,9 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-C:/temp/stm32/wongboard/Src/main.c \
-C:/temp/stm32/wongboard/Src/stm32f0xx_hal_msp.c \
-C:/temp/stm32/wongboard/Src/stm32f0xx_it.c 
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/main.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/stm32f0xx_hal_msp.c \
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/stm32f0xx_it.c 
 
 OBJS += \
 ./Application/User/main.o \
@@ -20,7 +20,7 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Application/User/main.o: C:/temp/stm32/wongboard/Src/main.c
+Application/User/main.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/main.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -28,7 +28,7 @@ Application/User/main.o: C:/temp/stm32/wongboard/Src/main.c
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Application/User/stm32f0xx_hal_msp.o: C:/temp/stm32/wongboard/Src/stm32f0xx_hal_msp.c
+Application/User/stm32f0xx_hal_msp.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/stm32f0xx_hal_msp.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%
@@ -36,7 +36,7 @@ Application/User/stm32f0xx_hal_msp.o: C:/temp/stm32/wongboard/Src/stm32f0xx_hal_
 	@echo 'Finished building: $<'
 	@echo ' '
 
-Application/User/stm32f0xx_it.o: C:/temp/stm32/wongboard/Src/stm32f0xx_it.c
+Application/User/stm32f0xx_it.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/Src/stm32f0xx_it.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%

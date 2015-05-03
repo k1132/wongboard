@@ -4,7 +4,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-C:/temp/stm32/wongboard/SW4STM32/syscalls.c 
+C:/drojf/Dropbox/current\ programming/STM32/wongboard/SW4STM32/syscalls.c 
 
 OBJS += \
 ./user/syscalls.o 
@@ -14,7 +14,7 @@ C_DEPS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-user/syscalls.o: C:/temp/stm32/wongboard/SW4STM32/syscalls.c
+user/syscalls.o: C:/drojf/Dropbox/current\ programming/STM32/wongboard/SW4STM32/syscalls.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: MCU GCC Compiler'
 	@echo %cd%

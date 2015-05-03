@@ -766,11 +766,11 @@ OUTPUT(wongboard Configuration.elf elf32-littlearm)
  .comment       0x00000000       0x71 ./Application/User/stm32f0xx_hal_msp.o
  .comment       0x00000000       0x71 ./Application/User/stm32f0xx_it.o
 
-.debug_line     0x00000000       0xc7
- .debug_line    0x00000000       0xc7 ./Application/SW4STM32/startup_stm32f072xb.o
+.debug_line     0x00000000       0xe4
+ .debug_line    0x00000000       0xe4 ./Application/SW4STM32/startup_stm32f072xb.o
 
-.debug_info     0x00000000       0xca
- .debug_info    0x00000000       0xca ./Application/SW4STM32/startup_stm32f072xb.o
+.debug_info     0x00000000      0x104
+ .debug_info    0x00000000      0x104 ./Application/SW4STM32/startup_stm32f072xb.o
 
 .debug_abbrev   0x00000000       0x12
  .debug_abbrev  0x00000000       0x12 ./Application/SW4STM32/startup_stm32f072xb.o
