@@ -35,7 +35,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
 #include "usb_device.h"
-
+#include "stdio.h"
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -46,7 +46,6 @@ ADC_HandleTypeDef hadc;
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
-UART_HandleTypeDef UartHandle;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -72,7 +71,14 @@ void blink()
 }
 
 //more links http://tunizem.blogspot.com.au/2014/09/using-adc-with-dma-on-stm32.html
-
+//todo 	- use makefile instead of batch file (lol)
+//		- figure out how to use debugger, or use uart and buspirate for some output
+//		- get extra usb cable for bus pirate
+#define UART_TIMEOUT 5000
+#define UART_SPEED 115200
+//uint8_t aTxBuffer[] = "hello\n";
+char aTxBuffer[50];
+	
 int main(void)
 {
   /* MCU Configuration----------------------------------------------------------*/
@@ -89,6 +95,8 @@ int main(void)
   MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
 
+  /* should calibrate ADC here! */
+  
   /* Infinite loop */
   int i;
   while (1)
@@ -98,12 +106,28 @@ int main(void)
 	HAL_ADC_PollForConversion(&hadc, 1);
 	 
 	uint32_t analog_val_12bit = HAL_ADC_GetValue(&hadc);
+	//uint32_t analog_val_12bit = i;
+	
+	i++;
 	//if(analog_val_12bit > 0)
-	//
+		
+	//if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000)!= HAL_OK)
+	
+	//don't send null terminator
+	snprintf(aTxBuffer, sizeof(aTxBuffer), "%d\n", analog_val_12bit);	
+	
+	HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
+	
+	//aTxBuffer[0] = 71;
+	//aTxBuffer[1] = '\n';
+	//HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, 2, 2000);
+	
+	HAL_Delay(10);
+
 	if(analog_val_12bit > 0x200)
 	{
 		i++;	
-		blink();
+		//blink();
 	}
 
   }
@@ -236,8 +260,8 @@ void MX_USART4_UART_Init(void)
 {
 
   huart4.Instance = USART4;
-  huart4.Init.BaudRate = 38400;
-  huart4.Init.WordLength = UART_WORDLENGTH_7B;
+  huart4.Init.BaudRate = UART_SPEED;
+  huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
   huart4.Init.Mode = UART_MODE_TX_RX;

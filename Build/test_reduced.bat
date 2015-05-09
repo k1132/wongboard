@@ -50,7 +50,8 @@ del *.o *.elf *.bin
 :: use '--specs=nosys.specs' instead?
 :: -Wl,--gc-sections remove unused code to prevent error/reduce binary size. See https://gcc.gnu.org/onlinedocs/gnat_ugn/Compilation-options.html 
 :: -Wl,[option] passes options to the linker, so --gc-sections means garbage collect unused sections. supposed to compile with first '-ffunction-sections' '-fdata-sections'
-%GCC_LOC% -DSTM32F072xB -mcpu=cortex-m0 -mthumb -Wl,--gc-sections -T%LD_PATH% *.o -o main.elf -Wall
+::use  rdimon.specs and nano.specs to link to nano-c library https://launchpadlibrarian.net/200699979/readme.txt
+%GCC_LOC% --specs=nano.specs --specs=rdimon.specs -DSTM32F072xB -mcpu=cortex-m0 -mthumb -Wl,--gc-sections -T%LD_PATH%  *.o -o main.elf -Wall 
 
 :: Print out size and convert .elf to .bin
 %SIZE_LOC% main.elf
