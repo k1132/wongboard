@@ -1,11 +1,14 @@
 /**
   ******************************************************************************
-  * @file    stm32f0xx_it.c
-  * @date    09/05/2015 16:28:51
-  * @brief   Interrupt Service Routines.
+  * @file    stm32f0xx_hal_adc_ex.h
+  * @author  MCD Application Team
+  * @version V1.2.1
+  * @date    09-January-2015
+  * @brief   Header file of ADC HAL Extension module.
   ******************************************************************************
+  * @attention
   *
-  * COPYRIGHT(c) 2015 STMicroelectronics
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -30,54 +33,66 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
+  */ 
+
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __STM32F0xx_HAL_ADC_EX_H
+#define __STM32F0xx_HAL_ADC_EX_H
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
+
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f0xx_hal.h"
-#include "stm32f0xx.h"
-#include "stm32f0xx_it.h"
+#include "stm32f0xx_hal_def.h"  
 
-/* USER CODE BEGIN 0 */
+/** @addtogroup STM32F0xx_HAL_Driver
+  * @{
+  */
 
-/* USER CODE END 0 */
+/** @addtogroup ADCEx
+  * @{
+  */ 
 
-/* External variables --------------------------------------------------------*/
-extern PCD_HandleTypeDef hpcd_USB_FS;
+/* Exported types ------------------------------------------------------------*/ 
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
+/** @addtogroup ADCEx_Exported_Functions
+  * @{
+  */
 
-/******************************************************************************/
-/*            Cortex-M0 Processor Interruption and Exception Handlers         */ 
-/******************************************************************************/
+/* IO operation functions  *****************************************************/
+/** @addtogroup ADCEx_Exported_Functions_Group1
+  * @{
+  */
+
+/* ADC calibration */
+HAL_StatusTypeDef       HAL_ADCEx_Calibration_Start(ADC_HandleTypeDef* hadc);
+/**
+  * @}
+  */
+
 
 /**
-* @brief This function handles System tick timer.
-*/
-void SysTick_Handler(void)
-{
-  HAL_IncTick();
-  HAL_SYSTICK_IRQHandler();
-}
+  * @}
+  */ 
 
-/******************************************************************************/
-/* STM32F0xx Peripheral Interrupt Handlers                                    */
-/* Add here the Interrupt Handlers for the used peripherals.                  */
-/* For the available peripheral interrupt handler names,                      */
-/* please refer to the startup file (startup_stm32f0xx.s).                    */
-/******************************************************************************/
 
 /**
-* @brief This function handles USB global interrupt (combined with EXTI line 18 interrupt).
-*/
-void USB_IRQHandler(void)
-{
-  /* USER CODE BEGIN USB_IRQn 0 */
+  * @}
+  */
 
-  /* USER CODE END USB_IRQn 0 */
-  HAL_PCD_IRQHandler(&hpcd_USB_FS);
-  /* USER CODE BEGIN USB_IRQn 1 */
-
-  /* USER CODE END USB_IRQn 1 */
+/**
+  * @}
+  */
+    
+#ifdef __cplusplus
 }
+#endif
 
-/* USER CODE BEGIN 1 */
+#endif /* __STM32F0xx_HAL_ADC_EX_H */
 
-/* USER CODE END 1 */
+
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

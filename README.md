@@ -12,5 +12,10 @@ The project uses the HAL library, although a version without HAL is coming soon.
 
 If you are using a different MCU, you should regenerate the 'Drivers' folder by making a new project using STM32Cube. Make sure to select 'SW4STM' to get the correct .ld (linker config) files.
 
-Todo: make proper readme file
+Todo: 
+- make proper readme file
+- get some sort of debugging working
 
+
+Useful links:
+- STM32 HAL Usb library documentation http://www.st.com/st-web-ui/static/active/en/resource/technical/document/user_manual/DM00108129.pdf

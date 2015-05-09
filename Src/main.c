@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 03/05/2015 22:31:08
+  * Date               : 09/05/2015 16:28:52
   * Description        : Main program body
   ******************************************************************************
   *
@@ -41,7 +41,9 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-UART_HandleTypeDef huart2;
+ADC_HandleTypeDef hadc;
+
+UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 UART_HandleTypeDef UartHandle;
@@ -50,23 +52,29 @@ UART_HandleTypeDef UartHandle;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART2_UART_Init(void);
+static void MX_ADC_Init(void);
+static void MX_USART4_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
-
 /* USER CODE END PFP */
 
-/* USER CODE BEGIN 0 */
+void blink()
+{
+	int index;
+	for (index = 0; index < 300000; index++);
 
-/* USER CODE END 0 */
+	//GPIOA->ODR   |= (1 << 5);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+
+	for (index = 0; index < 300000; index++);
+
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+}
+
+//more links http://tunizem.blogspot.com.au/2014/09/using-adc-with-dma-on-stm32.html
 
 int main(void)
 {
-
-  /* USER CODE BEGIN 1 */
-
-  /* USER CODE END 1 */
-
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -77,29 +85,28 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_USART2_UART_Init();
+  MX_ADC_Init();
+  MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
 
-  /* USER CODE BEGIN 2 */
-
-  /* USER CODE END 2 */
-
   /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
+  int i;
   while (1)
   {
-	int index;
-	for (index = 0; index < 300000; index++);
-
-	//GPIOA->ODR   |= (1 << 5);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-
-	for (index = 0; index < 300000; index++);
-
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+	  
+	HAL_ADC_Start(&hadc);
+	HAL_ADC_PollForConversion(&hadc, 1);
+	 
+	uint32_t analog_val_12bit = HAL_ADC_GetValue(&hadc);
+	//if(analog_val_12bit > 0)
+	//
+	if(analog_val_12bit > 0x200)
+	{
+		i++;	
+		blink();
+	}
 
   }
-  /* USER CODE END 3 */
 
 }
 
@@ -112,10 +119,13 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
   RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14
+                              |RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
+  RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
+  RCC_OscInitStruct.HSI14CalibrationValue = 16;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL12;
@@ -128,8 +138,7 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
 
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB|RCC_PERIPHCLK_USART2;
-  PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
   PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
@@ -137,21 +146,106 @@ void SystemClock_Config(void)
 
 }
 
-/* USART2 init function */
-void MX_USART2_UART_Init(void)
+/* ADC init function */
+void MX_ADC_Init(void)
 {
 
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 38400;
-  huart2.Init.WordLength = UART_WORDLENGTH_7B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX_RX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart2.Init.OneBitSampling = UART_ONEBIT_SAMPLING_DISABLED ;
-  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  HAL_UART_Init(&huart2);
+  ADC_ChannelConfTypeDef sConfig;
+
+    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+    */
+  hadc.Instance = ADC1;
+  hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC;
+  hadc.Init.Resolution = ADC_RESOLUTION12b;
+  hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
+  hadc.Init.EOCSelection = EOC_SINGLE_CONV;
+  hadc.Init.LowPowerAutoWait = DISABLE;
+  hadc.Init.LowPowerAutoPowerOff = DISABLE;
+  hadc.Init.ContinuousConvMode = DISABLE; //ENABLE;
+  hadc.Init.DiscontinuousConvMode = DISABLE;
+  hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc.Init.DMAContinuousRequests = DISABLE;
+  hadc.Init.Overrun = OVR_DATA_PRESERVED; //OVR_DATA_OVERWRITTEN;
+  HAL_ADC_Init(&hadc);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_0;
+  sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
+  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+/*
+  sConfig.Channel = ADC_CHANNEL_1;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_2;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_3;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_4;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_6;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_7;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+
+  sConfig.Channel = ADC_CHANNEL_8;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_9;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_10;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+  sConfig.Channel = ADC_CHANNEL_11;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+   
+  sConfig.Channel = ADC_CHANNEL_12;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+ 
+  sConfig.Channel = ADC_CHANNEL_13;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    
+  sConfig.Channel = ADC_CHANNEL_14;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+   
+  sConfig.Channel = ADC_CHANNEL_15;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+*/
+}
+
+/* USART4 init function */
+void MX_USART4_UART_Init(void)
+{
+
+  huart4.Instance = USART4;
+  huart4.Init.BaudRate = 38400;
+  huart4.Init.WordLength = UART_WORDLENGTH_7B;
+  huart4.Init.StopBits = UART_STOPBITS_1;
+  huart4.Init.Parity = UART_PARITY_NONE;
+  huart4.Init.Mode = UART_MODE_TX_RX;
+  huart4.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart4.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart4.Init.OneBitSampling = UART_ONEBIT_SAMPLING_DISABLED ;
+  huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  HAL_UART_Init(&huart4);
 
 }
 
@@ -171,6 +265,7 @@ void MX_GPIO_Init(void)
   __GPIOC_CLK_ENABLE();
   __GPIOF_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
+  __GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
