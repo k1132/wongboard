@@ -54,11 +54,11 @@
 
 #define USB_HID_CONFIG_DESC_SIZ       34
 #define USB_HID_DESC_SIZ              9
-#define HID_MOUSE_REPORT_DESC_SIZE    74
+#define HID_MOUSE_REPORT_DESC_SIZE    63 //50 //74
 
 #define HID_DESCRIPTOR_TYPE           0x21
 #define HID_REPORT_DESC               0x22
-#define HID_POLLING_INTERVAL          0x0A
+#define HID_POLLING_INTERVAL          0x1 //set 1ms polling rate 0x0A
 
 #define HID_REQ_SET_PROTOCOL          0x0B
 #define HID_REQ_GET_PROTOCOL          0x03

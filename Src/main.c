@@ -36,6 +36,9 @@
 #include "stm32f0xx_hal.h"
 #include "usb_device.h"
 #include "stdio.h"
+#include "usbd_hid.h"
+
+#define REPORT_SIZE 10
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
@@ -67,10 +70,21 @@ void blink()
 
 	for (index = 0; index < 300000; index++);
 
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+}
+
+void light_on()
+{
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
 }
 
+void light_off()
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+}
+
 //more links http://tunizem.blogspot.com.au/2014/09/using-adc-with-dma-on-stm32.html
+//http://visualgdb.com/tutorials/arm/stm32/usb/ stm32 usb tutorial
 //todo 	- use makefile instead of batch file (lol)
 //		- figure out how to use debugger, or use uart and buspirate for some output
 //		- get extra usb cable for bus pirate
@@ -78,7 +92,39 @@ void blink()
 #define UART_SPEED 115200
 //uint8_t aTxBuffer[] = "hello\n";
 char aTxBuffer[50];
-	
+	/*
+	// USB Device handle structure 
+typedef struct _USBD_HandleTypeDef
+{
+  uint8_t                 id;
+  uint32_t                dev_config;
+  uint32_t                dev_default_config;
+  uint32_t                dev_config_status; 
+  USBD_SpeedTypeDef       dev_speed; 
+  USBD_EndpointTypeDef    ep_in[15];
+  USBD_EndpointTypeDef    ep_out[15];  
+  uint32_t                ep0_state;  
+  uint32_t                ep0_data_len;     
+  uint8_t                 dev_state;
+  uint8_t                 dev_old_state;
+  uint8_t                 dev_address;
+  uint8_t                 dev_connection_status;  
+  uint8_t                 dev_test_mode;
+  uint32_t                dev_remote_wakeup;
+
+  USBD_SetupReqTypedef    request;
+  USBD_DescriptorsTypeDef *pDesc;
+  USBD_ClassTypeDef       *pClass;
+  void                    *pClassData;  
+  void                    *pUserData;    
+  void                    *pData;    
+} USBD_HandleTypeDef;
+
+*/
+
+uint8_t report[REPORT_SIZE];
+#define ASCII_OFFSET 4 - 'a'	//'a' in usb keyboard spec is '4'. This offset converts characters a-z , ie: uint8_t letter_c = c + ASCII_OFFSET
+
 int main(void)
 {
   /* MCU Configuration----------------------------------------------------------*/
@@ -102,34 +148,60 @@ int main(void)
   while (1)
   {
 	  
+	//DO ADC CONVERSION  
 	HAL_ADC_Start(&hadc);
 	HAL_ADC_PollForConversion(&hadc, 1);
 	 
 	uint32_t analog_val_12bit = HAL_ADC_GetValue(&hadc);
-	//uint32_t analog_val_12bit = i;
 	
-	i++;
+	
+	//i++;
 	//if(analog_val_12bit > 0)
 		
 	//if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000)!= HAL_OK)
 	
 	//don't send null terminator
-	snprintf(aTxBuffer, sizeof(aTxBuffer), "%d\n", analog_val_12bit);	
+	//snprintf(aTxBuffer, sizeof(aTxBuffer), "%ld\n", analog_val_12bit);	
 	
-	HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
+	//HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
 	
-	//aTxBuffer[0] = 71;
-	//aTxBuffer[1] = '\n';
-	//HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, 2, 2000);
+	//for(i = 0; i < 10; i++)
+	//	report[i] = 0;
 	
-	HAL_Delay(10);
-
-	if(analog_val_12bit > 0x200)
+	
+	//light_on();
+	//HAL_Delay(500);
+	
+	//for(i = 0; i < 10; i++)
+	//	report[i] = 10;
+	//report[4] = 0;
+	//Send_Report(report, REPORT_SIZE);
+	/*HAL_Delay(1);
+	report[4] = 'c' + ASCII_OFFSET; 
+	Send_Report(report, REPORT_SIZE);
+	HAL_Delay(1);
+	report[4] = 0;
+	Send_Report(report, REPORT_SIZE);
+	
+	light_off();
+	HAL_Delay(1);*/
+	
+	//report[4] = 0;
+	//Send_Report(report, REPORT_SIZE)
+	light_off();
+	if(analog_val_12bit < 200)//> 0x200)
 	{
+		report[4] = 'c' + ASCII_OFFSET; 
+		Send_Report(report, REPORT_SIZE);
 		i++;	
-		//blink();
+		light_on();
 	}
-
+	else 
+	{
+		report[4] = 0;
+		Send_Report(report, REPORT_SIZE);
+	}
+	HAL_Delay(2);
   }
 
 }

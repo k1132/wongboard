@@ -43,6 +43,8 @@
 /* USB Device Core handle declaration */
 USBD_HandleTypeDef hUsbDeviceFS;
 
+
+
 /* init function */				        
 void MX_USB_DEVICE_Init(void)
 {
@@ -51,9 +53,20 @@ void MX_USB_DEVICE_Init(void)
 
   USBD_RegisterClass(&hUsbDeviceFS, &USBD_HID);
 
-  USBD_Start(&hUsbDeviceFS);
+  USBD_Start(&hUsbDeviceFS);	
 
+  //the USBD_HID_Init function seems to completely ignore the second argument, so I will set it to 0 for now...
+  //USBD_HID_Init(&hUsbDeviceFS, 0);
+  
+  
 }
+//report should be 
+uint8_t Send_Report(uint8_t *report, uint16_t len)
+{
+	return USBD_HID_SendReport (&hUsbDeviceFS, report, len);
+}
+
+
 /**
   * @}
   */

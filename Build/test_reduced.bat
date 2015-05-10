@@ -23,7 +23,7 @@ set INCLUDE_ARGS=-I%CMSIS_INC% -I%HAL_INC% -I%STM32CUBE_INC% -I%DEVICE_INC% -I%H
 set CFLAGS= -DUSE_HAL_DRIVER -DSTM32F072xB -mcpu=cortex-m0 -mthumb -Wall %INCLUDE_ARGS% -ffunction-sections -fdata-sections
 
 
-goto BUILD_USER_FILES
+::goto BUILD_USER_FILES
 
 ::do full rebuild
 del *.o *.elf *.bin
@@ -41,8 +41,8 @@ del *.o *.elf *.bin
 :BUILD_USER_FILES
 
 :: buld user files
-::%GCC_LOC% %CFLAGS% -c "..\Src\*.c"  
-%GCC_LOC% %CFLAGS% -c "..\Src\main.c"  
+%GCC_LOC% %CFLAGS% -c "..\Src\*.c"  
+::%GCC_LOC% %CFLAGS% -c "..\Src\main.c"  
 
 
 :: link everything. -T%LD_PATH% includes the linker config file.
