@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 09/05/2015 16:28:52
+  * Date               : 16/05/2015 17:57:54
   * Description        : Main program body
   ******************************************************************************
   *
@@ -34,46 +34,36 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
-#include "usb_device.h"
-#include "stdio.h"
-#include "usbd_hid.h"
 
-#define REPORT_SIZE 10
 /* USER CODE BEGIN Includes */
-
+#include "stdio.h"
+#include "string.h"
+#define UART_TIMEOUT 5000
+#define UART_SPEED 115200
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
-DMA_HandleTypeDef hdma_adc;
+
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_DMA_Init(void);
 static void MX_ADC_Init(void);
 static void MX_USART4_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
+char aTxBuffer[50];
+char hello[] = "hello\r\n";
+uint16_t ADC1_DMA_buffer[2];
 /* USER CODE END PFP */
 
-void blink()
-{
-	int index;
-	for (index = 0; index < 300000; index++);
-
-	//GPIOA->ODR   |= (1 << 5);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-
-	for (index = 0; index < 300000; index++);
-
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-}
-
+/* USER CODE BEGIN 0 */
 void light_on()
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
@@ -83,51 +73,15 @@ void light_off()
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 }
-
-//more links http://tunizem.blogspot.com.au/2014/09/using-adc-with-dma-on-stm32.html
-//http://visualgdb.com/tutorials/arm/stm32/usb/ stm32 usb tutorial
-//todo 	- use makefile instead of batch file (lol)
-//		- figure out how to use debugger, or use uart and buspirate for some output
-//		- get extra usb cable for bus pirate
-#define UART_TIMEOUT 5000
-#define UART_SPEED 115200
-//uint8_t aTxBuffer[] = "hello\n";
-char aTxBuffer[50];
-	/*
-	// USB Device handle structure 
-typedef struct _USBD_HandleTypeDef
-{
-  uint8_t                 id;
-  uint32_t                dev_config;
-  uint32_t                dev_default_config;
-  uint32_t                dev_config_status; 
-  USBD_SpeedTypeDef       dev_speed; 
-  USBD_EndpointTypeDef    ep_in[15];
-  USBD_EndpointTypeDef    ep_out[15];  
-  uint32_t                ep0_state;  
-  uint32_t                ep0_data_len;     
-  uint8_t                 dev_state;
-  uint8_t                 dev_old_state;
-  uint8_t                 dev_address;
-  uint8_t                 dev_connection_status;  
-  uint8_t                 dev_test_mode;
-  uint32_t                dev_remote_wakeup;
-
-  USBD_SetupReqTypedef    request;
-  USBD_DescriptorsTypeDef *pDesc;
-  USBD_ClassTypeDef       *pClass;
-  void                    *pClassData;  
-  void                    *pUserData;    
-  void                    *pData;    
-} USBD_HandleTypeDef;
-
-*/
-
-uint8_t report[REPORT_SIZE];
-#define ASCII_OFFSET 4 - 'a'	//'a' in usb keyboard spec is '4'. This offset converts characters a-z , ie: uint8_t letter_c = c + ASCII_OFFSET
+/* USER CODE END 0 */
 
 int main(void)
 {
+
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+
   /* MCU Configuration----------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
@@ -138,73 +92,41 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC_Init();
   MX_USART4_UART_Init();
-  MX_USB_DEVICE_Init();
 
-  /* should calibrate ADC here! */
-  
+  /* USER CODE BEGIN 2 */
+
+  /* USER CODE END 2 */
+
   /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
   int i;
   while (1)
   {
 	  
-	//DO ADC CONVERSION  
 	HAL_ADC_Start(&hadc);
 	HAL_ADC_PollForConversion(&hadc, 1);
-	 
-	uint32_t analog_val_12bit = HAL_ADC_GetValue(&hadc);
+	//uint32_t analog_val_12bit = ADC1_DMA_buffer[0];
+	ADC1_DMA_buffer[0] = HAL_ADC_GetValue(&hadc);
 	
-	
-	//i++;
-	//if(analog_val_12bit > 0)
-		
-	//if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000)!= HAL_OK)
-	
-	//don't send null terminator
-	snprintf(aTxBuffer, sizeof(aTxBuffer), "%ld\n", analog_val_12bit);	
+	light_on();
+	  HAL_Delay(200);
+	  light_off();
+	  HAL_Delay(200);
+	  
+	snprintf(aTxBuffer, sizeof(aTxBuffer), "%d %d\n", ADC1_DMA_buffer[0], ADC1_DMA_buffer[1]);	
 	
 	HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
-	
-	//for(i = 0; i < 10; i++)
-	//	report[i] = 0;
-	
-	
-	//light_on();
-	//HAL_Delay(500);
-	
-	//for(i = 0; i < 10; i++)
-	//	report[i] = 10;
-	//report[4] = 0;
-	//Send_Report(report, REPORT_SIZE);
-	/*HAL_Delay(1);
-	report[4] = 'c' + ASCII_OFFSET; 
-	Send_Report(report, REPORT_SIZE);
-	HAL_Delay(1);
-	report[4] = 0;
-	Send_Report(report, REPORT_SIZE);
-	
-	light_off();
-	HAL_Delay(1);*/
-	
-	//report[4] = 0;
-	//Send_Report(report, REPORT_SIZE)
-	light_off();
-	if(analog_val_12bit < 200)//> 0x200)
-	{
-		report[4] = 'c' + ASCII_OFFSET; 
-		Send_Report(report, REPORT_SIZE);
-		i++;	
-		light_on();
-	}
-	else 
-	{
-		report[4] = 0;
-		Send_Report(report, REPORT_SIZE);
-	}
-	HAL_Delay(2);
+
+	//HAL_Delay(200);
+	 // i++;
+  /* USER CODE END WHILE */
+
+  /* USER CODE BEGIN 3 */
+
   }
+  /* USER CODE END 3 */
 
 }
 
@@ -215,12 +137,9 @@ void SystemClock_Config(void)
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
-  RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14
-                              |RCC_OSCILLATORTYPE_HSI48;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
-  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -235,10 +154,6 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
-
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
-  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
-  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
   __SYSCFG_CLK_ENABLE();
 
@@ -260,11 +175,11 @@ void MX_ADC_Init(void)
   hadc.Init.EOCSelection = EOC_SINGLE_CONV;
   hadc.Init.LowPowerAutoWait = DISABLE;
   hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  hadc.Init.ContinuousConvMode = ENABLE;
+  hadc.Init.ContinuousConvMode = DISABLE;
   hadc.Init.DiscontinuousConvMode = DISABLE;
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.DMAContinuousRequests = ENABLE;
-  hadc.Init.Overrun = OVR_DATA_OVERWRITTEN;
+  hadc.Init.DMAContinuousRequests = DISABLE;
+  hadc.Init.Overrun = OVR_DATA_PRESERVED;
   HAL_ADC_Init(&hadc);
 
     /**Configure for the selected ADC regular channel to be converted. 
@@ -272,76 +187,6 @@ void MX_ADC_Init(void)
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_1;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_2;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_3;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_4;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_6;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_7;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_8;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_9;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_10;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_11;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_12;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_13;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_14;
-  HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
-    /**Configure for the selected ADC regular channel to be converted. 
-    */
-  sConfig.Channel = ADC_CHANNEL_15;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
 }
@@ -364,20 +209,6 @@ void MX_USART4_UART_Init(void)
 
 }
 
-/** 
-  * Enable DMA controller clock
-  */
-void MX_DMA_Init(void) 
-{
-  /* DMA controller clock enable */
-  __DMA1_CLK_ENABLE();
-
-  /* DMA interrupt init */
-  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
-}
-
 /** Configure pins as 
         * Analog 
         * Input 
@@ -394,7 +225,6 @@ void MX_GPIO_Init(void)
   __GPIOC_CLK_ENABLE();
   __GPIOF_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
-  __GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;
