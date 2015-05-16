@@ -161,9 +161,9 @@ int main(void)
 	//if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE, 5000)!= HAL_OK)
 	
 	//don't send null terminator
-	//snprintf(aTxBuffer, sizeof(aTxBuffer), "%ld\n", analog_val_12bit);	
+	snprintf(aTxBuffer, sizeof(aTxBuffer), "%ld\n", analog_val_12bit);	
 	
-	//HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
+	HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
 	
 	//for(i = 0; i < 10; i++)
 	//	report[i] = 0;
