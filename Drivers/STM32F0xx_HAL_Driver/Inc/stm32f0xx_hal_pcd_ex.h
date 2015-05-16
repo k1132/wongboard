@@ -1,11 +1,14 @@
 /**
   ******************************************************************************
-  * @file    stm32f0xx_it.h
-  * @date    16/05/2015 22:24:01
-  * @brief   This file contains the headers of the interrupt handlers.
+  * @file    stm32f0xx_hal_pcd_ex.h
+  * @author  MCD Application Team
+  * @version V1.2.1
+  * @date    09-January-2015
+  * @brief   Header file of PCD HAL Extension module.
   ******************************************************************************
+  * @attention
   *
-  * COPYRIGHT(c) 2015 STMicroelectronics
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -30,30 +33,71 @@
   * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
   *
   ******************************************************************************
-  */
+  */ 
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __STM32F0xx_IT_H
-#define __STM32F0xx_IT_H
+#ifndef __STM32L0xx_HAL_PCD_EX_H
+#define __STM32L0xx_HAL_PCD_EX_H
 
 #ifdef __cplusplus
  extern "C" {
-#endif 
+#endif
+
+#if defined(STM32F042x6) || defined(STM32F048xx) || defined(STM32F072xB) || defined(STM32F078xx)|| defined(STM32F070xB)|| defined(STM32F070x6)
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f0xx_hal_def.h"  
+   
+/** @addtogroup STM32F0xx_HAL_Driver
+  * @{
+  */
+
+/** @addtogroup PCDEx
+  * @{
+  */ 
+
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions ------------------------------------------------------- */
+/* Exported macros -----------------------------------------------------------*/
+/* Internal macros -----------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 
-void DMA1_Channel1_IRQHandler(void);
-void USB_IRQHandler(void);
-void SysTick_Handler(void);
+/** @addtogroup PCDEx_Exported_Functions
+  * @{
+  */
+  
+/** @addtogroup PCDEx_Exported_Functions_Group2
+  * @{
+  */
+   
+HAL_StatusTypeDef HAL_PCDEx_PMAConfig(PCD_HandleTypeDef *hpcd, 
+                                     uint16_t ep_addr,
+                                     uint16_t ep_kind,
+                                     uint32_t pmaadress);
+/**
+  * @}
+  */ 
+  
+/**
+  * @}
+  */ 
+
+/**
+  * @}
+  */
+
+/**
+  * @}
+  */   
+
+#endif /* STM32F042x6 || STM32F072xB || STM32F078xx || STM32F070xB || STM32F070x6*/
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __STM32F0xx_IT_H */
+
+#endif /* __STM32F0xx_HAL_PCD_EX_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
+

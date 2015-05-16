@@ -1,11 +1,10 @@
 /**
   ******************************************************************************
-  * @file           : USB_DEVICE
-  * @date           : 09/05/2015 16:28:50  
+  * @file           : usbd_desc.h
+  * @date           : 16/05/2015 22:24:01  
   * @version        : v1.0_Cube
-  * @brief          : This file implements the USB Device 
+  * @brief          : Header for usbd_desc file.
   ******************************************************************************
-  *
   * COPYRIGHT(c) 2015 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
@@ -33,44 +32,73 @@
   ******************************************************************************
 */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __USBD_DESC__H__
+#define __USBD_DESC__H__
+
+#ifdef __cplusplus
+ extern "C" {
+#endif
 /* Includes ------------------------------------------------------------------*/
+#include "usbd_def.h"
 
-#include "usb_device.h"
-#include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_hid.h"
-
-/* USB Device Core handle declaration */
-USBD_HandleTypeDef hUsbDeviceFS;
-
-
-
-/* init function */				        
-void MX_USB_DEVICE_Init(void)
-{
-  /* Init Device Library,Add Supported Class and Start the library*/
-  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
-
-  USBD_RegisterClass(&hUsbDeviceFS, &USBD_HID);
-
-  USBD_Start(&hUsbDeviceFS);	
-
-  //the USBD_HID_Init function seems to completely ignore the second argument, so I will set it to 0 for now...
-  //USBD_HID_Init(&hUsbDeviceFS, 0);
+/** @addtogroup STM32_USB_OTG_DEVICE_LIBRARY
+  * @{
+  */
   
-  
-}
-uint8_t Send_Report(uint8_t *report, uint16_t len)
-{
-	return USBD_HID_SendReport(&hUsbDeviceFS, report, len);
-}
+/** @defgroup USB_DESC
+  * @brief general defines for the usb device library file
+  * @{
+  */ 
 
-/**
-  * @}
+/** @defgroup USB_DESC_Exported_Defines
+  * @{
   */
 
 /**
   * @}
-  */
+  */ 
 
+/** @defgroup USBD_DESC_Exported_TypesDefinitions
+  * @{
+  */
+/**
+  * @}
+  */ 
+
+/** @defgroup USBD_DESC_Exported_Macros
+  * @{
+  */ 
+/**
+  * @}
+  */ 
+
+/** @defgroup USBD_DESC_Exported_Variables
+  * @{
+  */ 
+extern USBD_DescriptorsTypeDef FS_Desc;
+/**
+  * @}
+  */ 
+
+/** @defgroup USBD_DESC_Exported_FunctionsPrototype
+  * @{
+  */ 
+  
+/**
+  * @}
+  */ 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __USBD_DESC_H */
+
+/**
+  * @}
+  */ 
+
+/**
+* @}
+*/ 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

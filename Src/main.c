@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 16/05/2015 19:51:13
+  * Date               : 16/05/2015 22:24:02
   * Description        : Main program body
   ******************************************************************************
   *
@@ -34,6 +34,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
+#include "usb_device.h"
 
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
@@ -42,6 +43,7 @@
 #define UART_SPEED 115200
 #define NUMBER_OF_ADC 8
 #define HID_REPORT_SIZE 10
+#define ASCII_OFFSET 4 - 'a'
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -52,7 +54,7 @@ UART_HandleTypeDef huart4;
 /* USER CODE BEGIN PV */
 char aTxBuffer[50];
 uint16_t ADC1_DMA_buffer[NUMBER_OF_ADC];
-uint8_t report[REPORT_SIZE];
+uint8_t report[HID_REPORT_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -80,6 +82,10 @@ void _puts(char * str)
 {
 	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
 }
+
+//report should be 
+
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -102,6 +108,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC_Init();
   MX_USART4_UART_Init();
+  MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
   //NOTE: DMA configured to load a half word (16 bits) at a time from the ADC
@@ -112,11 +119,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	light_on();
-	HAL_Delay(80);
-	light_off();
-	HAL_Delay(80);
-	
 	int i;
 	for(i = 0; i < NUMBER_OF_ADC; i++)
 	{
@@ -126,24 +128,25 @@ int main(void)
 	_puts("\n");
 	
 	//Send_Report(report, REPORT_SIZE)
-	/*light_off();
-	if(analog_val_12bit < 200)//> 0x200)
+	light_off();
+	if(ADC1_DMA_buffer[0] < 200)//> 0x200)
 	{
 		report[4] = 'c' + ASCII_OFFSET; 
-		Send_Report(report, REPORT_SIZE);
+		Send_Report(report, HID_REPORT_SIZE);
 		i++;	
 		light_on();
 	}
 	else 
 	{
 		report[4] = 0;
-		Send_Report(report, REPORT_SIZE);
-	}*/
+		Send_Report(report, HID_REPORT_SIZE);
+	}
   }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
   /* USER CODE END 3 */
+
 }
 
 /** System Clock Configuration
@@ -153,9 +156,12 @@ void SystemClock_Config(void)
 
   RCC_OscInitTypeDef RCC_OscInitStruct;
   RCC_ClkInitTypeDef RCC_ClkInitStruct;
+  RCC_PeriphCLKInitTypeDef PeriphClkInit;
 
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSI14
+                              |RCC_OSCILLATORTYPE_HSI48;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.HSI14State = RCC_HSI14_ON;
   RCC_OscInitStruct.HSICalibrationValue = 16;
   RCC_OscInitStruct.HSI14CalibrationValue = 16;
@@ -170,6 +176,10 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1);
+
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USB;
+  PeriphClkInit.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
+  HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
 
   __SYSCFG_CLK_ENABLE();
 

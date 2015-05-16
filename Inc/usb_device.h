@@ -1,11 +1,10 @@
 /**
   ******************************************************************************
   * @file           : USB_DEVICE
-  * @date           : 09/05/2015 16:28:50  
+  * @date           : 16/05/2015 22:24:01  
   * @version        : v1.0_Cube
-  * @brief          : This file implements the USB Device 
+  * @brief          : Header for usb_device file.
   ******************************************************************************
-  *
   * COPYRIGHT(c) 2015 STMicroelectronics
   *
   * Redistribution and use in source and binary forms, with or without modification,
@@ -32,38 +31,28 @@
   *
   ******************************************************************************
 */
+/* Define to prevent recursive inclusion -------------------------------------*/
+#ifndef __usb_device_H
+#define __usb_device_H
+#ifdef __cplusplus
+ extern "C" {
+#endif
 
 /* Includes ------------------------------------------------------------------*/
+#include "stm32f0xx.h"
+#include "stm32f0xx_hal.h"
+#include "usbd_def.h"
 
-#include "usb_device.h"
-#include "usbd_core.h"
-#include "usbd_desc.h"
-#include "usbd_hid.h"
+extern USBD_HandleTypeDef hUsbDeviceFS;
 
-/* USB Device Core handle declaration */
-USBD_HandleTypeDef hUsbDeviceFS;
+/* USB_Device init function */	
+void MX_USB_DEVICE_Init(void);
+uint8_t Send_Report(uint8_t *report, uint16_t len);
 
-
-
-/* init function */				        
-void MX_USB_DEVICE_Init(void)
-{
-  /* Init Device Library,Add Supported Class and Start the library*/
-  USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);
-
-  USBD_RegisterClass(&hUsbDeviceFS, &USBD_HID);
-
-  USBD_Start(&hUsbDeviceFS);	
-
-  //the USBD_HID_Init function seems to completely ignore the second argument, so I will set it to 0 for now...
-  //USBD_HID_Init(&hUsbDeviceFS, 0);
-  
-  
+#ifdef __cplusplus
 }
-uint8_t Send_Report(uint8_t *report, uint16_t len)
-{
-	return USBD_HID_SendReport(&hUsbDeviceFS, report, len);
-}
+#endif
+#endif /*__usb_device_H */
 
 /**
   * @}
