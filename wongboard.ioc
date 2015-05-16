@@ -1,5 +1,5 @@
 #MicroXplorer Configuration settings - do not modify
-#Sat May 16 19:51:12 AEST 2015
+#Sat May 16 21:59:16 AEST 2015
 ADC.ContinuousConvMode=ENABLE
 ADC.DMAContinuousRequests=ENABLE
 ADC.IPParameters=ContinuousConvMode,Overrun,DMAContinuousRequests,SamplingTime

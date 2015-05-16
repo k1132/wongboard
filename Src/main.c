@@ -41,16 +41,18 @@
 #define UART_TIMEOUT 5000
 #define UART_SPEED 115200
 #define NUMBER_OF_ADC 8
+#define HID_REPORT_SIZE 10
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
 DMA_HandleTypeDef hdma_adc;
-
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
-
+char aTxBuffer[50];
+uint16_t ADC1_DMA_buffer[NUMBER_OF_ADC];
+uint8_t report[REPORT_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -61,9 +63,6 @@ static void MX_ADC_Init(void);
 static void MX_USART4_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
-char aTxBuffer[50];
-char hello[] = "hello\r\n";
-uint16_t ADC1_DMA_buffer[NUMBER_OF_ADC];
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -81,7 +80,6 @@ void _puts(char * str)
 {
 	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
 }
-
 /* USER CODE END 0 */
 
 int main(void)
@@ -106,9 +104,7 @@ int main(void)
   MX_USART4_UART_Init();
 
   /* USER CODE BEGIN 2 */
-  //HAL_ADC_Start(&hadc);
-  //NOTE: DMA configured to load a half word (16 bits) at a time.
-  
+  //NOTE: DMA configured to load a half word (16 bits) at a time from the ADC
   HAL_ADC_Start_DMA(&hadc, (uint32_t*)ADC1_DMA_buffer, NUMBER_OF_ADC);
   /* USER CODE END 2 */
 
@@ -116,13 +112,10 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	
-	//ADC1_DMA_buffer[0] = HAL_ADC_GetValue(&hadc);
-	
 	light_on();
-	  HAL_Delay(80);
-	  light_off();
-	  HAL_Delay(80);
+	HAL_Delay(80);
+	light_off();
+	HAL_Delay(80);
 	
 	int i;
 	for(i = 0; i < NUMBER_OF_ADC; i++)
@@ -132,15 +125,25 @@ int main(void)
 	}
 	_puts("\n");
 	
-	//HAL_Delay(200);
-	 // i++;
+	//Send_Report(report, REPORT_SIZE)
+	/*light_off();
+	if(analog_val_12bit < 200)//> 0x200)
+	{
+		report[4] = 'c' + ASCII_OFFSET; 
+		Send_Report(report, REPORT_SIZE);
+		i++;	
+		light_on();
+	}
+	else 
+	{
+		report[4] = 0;
+		Send_Report(report, REPORT_SIZE);
+	}*/
+  }
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-//ADC_SAMPLETIME_239CYCLES_5;
-  }
   /* USER CODE END 3 */
-
 }
 
 /** System Clock Configuration
