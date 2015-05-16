@@ -45,7 +45,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
-
+DMA_HandleTypeDef hdma_adc;
 UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
@@ -54,6 +54,7 @@ UART_HandleTypeDef huart4;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC_Init(void);
 static void MX_USART4_UART_Init(void);
 
@@ -137,6 +138,7 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC_Init();
   MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
@@ -258,11 +260,11 @@ void MX_ADC_Init(void)
   hadc.Init.EOCSelection = EOC_SINGLE_CONV;
   hadc.Init.LowPowerAutoWait = DISABLE;
   hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  hadc.Init.ContinuousConvMode = DISABLE; //ENABLE;
+  hadc.Init.ContinuousConvMode = ENABLE;
   hadc.Init.DiscontinuousConvMode = DISABLE;
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.DMAContinuousRequests = DISABLE;
-  hadc.Init.Overrun = OVR_DATA_PRESERVED; //OVR_DATA_OVERWRITTEN;
+  hadc.Init.DMAContinuousRequests = ENABLE;
+  hadc.Init.Overrun = OVR_DATA_OVERWRITTEN;
   HAL_ADC_Init(&hadc);
 
     /**Configure for the selected ADC regular channel to be converted. 
@@ -272,59 +274,76 @@ void MX_ADC_Init(void)
   sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-/*
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_1;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_2;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_3;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_4;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_6;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_7;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_8;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_9;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_10;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_11;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-   
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_12;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
- 
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_13;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_14;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-   
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
   sConfig.Channel = ADC_CHANNEL_15;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
-*/
+
 }
 
 /* USART4 init function */
@@ -332,7 +351,7 @@ void MX_USART4_UART_Init(void)
 {
 
   huart4.Instance = USART4;
-  huart4.Init.BaudRate = UART_SPEED;
+  huart4.Init.BaudRate = 115200;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
@@ -342,6 +361,20 @@ void MX_USART4_UART_Init(void)
   huart4.Init.OneBitSampling = UART_ONEBIT_SAMPLING_DISABLED ;
   huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   HAL_UART_Init(&huart4);
+
+}
+
+/** 
+  * Enable DMA controller clock
+  */
+void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
 
 }
 
