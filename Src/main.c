@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : main.c
-  * Date               : 16/05/2015 17:57:54
+  * Date               : 16/05/2015 19:51:13
   * Description        : Main program body
   ******************************************************************************
   *
@@ -40,10 +40,12 @@
 #include "string.h"
 #define UART_TIMEOUT 5000
 #define UART_SPEED 115200
+#define NUMBER_OF_ADC 8
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc;
+DMA_HandleTypeDef hdma_adc;
 
 UART_HandleTypeDef huart4;
 
@@ -54,13 +56,14 @@ UART_HandleTypeDef huart4;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
+static void MX_DMA_Init(void);
 static void MX_ADC_Init(void);
 static void MX_USART4_UART_Init(void);
 
 /* USER CODE BEGIN PFP */
 char aTxBuffer[50];
 char hello[] = "hello\r\n";
-uint16_t ADC1_DMA_buffer[2];
+uint16_t ADC1_DMA_buffer[NUMBER_OF_ADC];
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -73,6 +76,12 @@ void light_off()
 {
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
 }
+
+void _puts(char * str)
+{
+	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
+}
+
 /* USER CODE END 0 */
 
 int main(void)
@@ -92,39 +101,43 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   MX_ADC_Init();
   MX_USART4_UART_Init();
 
   /* USER CODE BEGIN 2 */
-
+  //HAL_ADC_Start(&hadc);
+  //NOTE: DMA configured to load a half word (16 bits) at a time.
+  
+  HAL_ADC_Start_DMA(&hadc, (uint32_t*)ADC1_DMA_buffer, NUMBER_OF_ADC);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  int i;
   while (1)
   {
-	  
-	HAL_ADC_Start(&hadc);
-	HAL_ADC_PollForConversion(&hadc, 1);
-	//uint32_t analog_val_12bit = ADC1_DMA_buffer[0];
-	ADC1_DMA_buffer[0] = HAL_ADC_GetValue(&hadc);
+	
+	//ADC1_DMA_buffer[0] = HAL_ADC_GetValue(&hadc);
 	
 	light_on();
-	  HAL_Delay(200);
+	  HAL_Delay(80);
 	  light_off();
-	  HAL_Delay(200);
-	  
-	snprintf(aTxBuffer, sizeof(aTxBuffer), "%d %d\n", ADC1_DMA_buffer[0], ADC1_DMA_buffer[1]);	
+	  HAL_Delay(80);
 	
-	HAL_UART_Transmit(&huart4, (uint8_t*)aTxBuffer, strlen(aTxBuffer), UART_TIMEOUT);
-
+	int i;
+	for(i = 0; i < NUMBER_OF_ADC; i++)
+	{
+		snprintf(aTxBuffer, sizeof(aTxBuffer), "%d ", ADC1_DMA_buffer[i]);	
+		_puts(aTxBuffer);
+	}
+	_puts("\n");
+	
 	//HAL_Delay(200);
 	 // i++;
   /* USER CODE END WHILE */
 
   /* USER CODE BEGIN 3 */
-
+//ADC_SAMPLETIME_239CYCLES_5;
   }
   /* USER CODE END 3 */
 
@@ -175,18 +188,53 @@ void MX_ADC_Init(void)
   hadc.Init.EOCSelection = EOC_SINGLE_CONV;
   hadc.Init.LowPowerAutoWait = DISABLE;
   hadc.Init.LowPowerAutoPowerOff = DISABLE;
-  hadc.Init.ContinuousConvMode = DISABLE;
+  hadc.Init.ContinuousConvMode = ENABLE;
   hadc.Init.DiscontinuousConvMode = DISABLE;
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc.Init.DMAContinuousRequests = DISABLE;
-  hadc.Init.Overrun = OVR_DATA_PRESERVED;
+  hadc.Init.DMAContinuousRequests = ENABLE;
+  hadc.Init.Overrun = OVR_DATA_OVERWRITTEN;
   HAL_ADC_Init(&hadc);
 
     /**Configure for the selected ADC regular channel to be converted. 
     */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
-  sConfig.SamplingTime = ADC_SAMPLETIME_1CYCLE_5;
+  sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_1;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_4;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_8;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_10;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_11;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_12;
+  HAL_ADC_ConfigChannel(&hadc, &sConfig);
+
+    /**Configure for the selected ADC regular channel to be converted. 
+    */
+  sConfig.Channel = ADC_CHANNEL_13;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
 }
@@ -209,6 +257,20 @@ void MX_USART4_UART_Init(void)
 
 }
 
+/** 
+  * Enable DMA controller clock
+  */
+void MX_DMA_Init(void) 
+{
+  /* DMA controller clock enable */
+  __DMA1_CLK_ENABLE();
+
+  /* DMA interrupt init */
+  HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
+
+}
+
 /** Configure pins as 
         * Analog 
         * Input 
@@ -223,8 +285,8 @@ void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __GPIOC_CLK_ENABLE();
-  __GPIOF_CLK_ENABLE();
   __GPIOA_CLK_ENABLE();
+  __GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin : PC13 */
   GPIO_InitStruct.Pin = GPIO_PIN_13;

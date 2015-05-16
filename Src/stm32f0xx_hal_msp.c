@@ -1,7 +1,7 @@
 /**
   ******************************************************************************
   * File Name          : stm32f0xx_hal_msp.c
-  * Date               : 16/05/2015 17:57:54
+  * Date               : 16/05/2015 19:51:12
   * Description        : This file provides code for the MSP Initialization 
   *                      and de-Initialization codes.
   ******************************************************************************
@@ -34,6 +34,8 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx_hal.h"
+
+extern DMA_HandleTypeDef hdma_adc;
 
 /* USER CODE BEGIN 0 */
 
@@ -70,14 +72,43 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
     __ADC1_CLK_ENABLE();
   
     /**ADC GPIO Configuration    
+    PC0     ------> ADC_IN10
+    PC1     ------> ADC_IN11
+    PC2     ------> ADC_IN12
+    PC3     ------> ADC_IN13
     PA0     ------> ADC_IN0
-    PA2     ------> ADC_IN2
-    PA3     ------> ADC_IN3 
+    PA1     ------> ADC_IN1
+    PA4     ------> ADC_IN4
+    PB0     ------> ADC_IN8 
     */
-    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    /* Peripheral DMA init*/
+  
+    hdma_adc.Instance = DMA1_Channel1;
+    hdma_adc.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    hdma_adc.Init.PeriphInc = DMA_PINC_DISABLE;
+    hdma_adc.Init.MemInc = DMA_MINC_ENABLE;
+    hdma_adc.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+    hdma_adc.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+    hdma_adc.Init.Mode = DMA_CIRCULAR;
+    hdma_adc.Init.Priority = DMA_PRIORITY_LOW;
+    HAL_DMA_Init(&hdma_adc);
+
+    __HAL_LINKDMA(hadc,DMA_Handle,hdma_adc);
 
   /* USER CODE BEGIN ADC1_MspInit 1 */
 
@@ -98,12 +129,23 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     __ADC1_CLK_DISABLE();
   
     /**ADC GPIO Configuration    
+    PC0     ------> ADC_IN10
+    PC1     ------> ADC_IN11
+    PC2     ------> ADC_IN12
+    PC3     ------> ADC_IN13
     PA0     ------> ADC_IN0
-    PA2     ------> ADC_IN2
-    PA3     ------> ADC_IN3 
+    PA1     ------> ADC_IN1
+    PA4     ------> ADC_IN4
+    PB0     ------> ADC_IN8 
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_2|GPIO_PIN_3);
+    HAL_GPIO_DeInit(GPIOC, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
 
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_4);
+
+    HAL_GPIO_DeInit(GPIOB, GPIO_PIN_0);
+
+    /* Peripheral DMA DeInit*/
+    HAL_DMA_DeInit(hadc->DMA_Handle);
   /* USER CODE BEGIN ADC1_MspDeInit 1 */
 
   /* USER CODE END ADC1_MspDeInit 1 */
