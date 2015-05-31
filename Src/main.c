@@ -49,18 +49,18 @@
 #define BUFFER_SIZE (NUMBER_OF_ADC*SAMPLES_PER_ADC)
 
 #define HID_REPORT_SIZE 10		//total size of the keyboard report
-#define HID_REPORT_KBD_OFFSET	3 		//which byte the keyboard keypresses starts at	
+#define HID_REPORT_KBD_OFFSET	3 		//which byte the keyboard keypresses starts at
 #define ASCII_OFFSET (4 - 'a')	//convert ASCII char into HID report by adding this offset: ie 'c' would be = 'c' + ASCII_OFFSET
 
 #define VCC 5
 #define R2 1000
 
 //each bit represents a key is currently pressed/not pressed
-unsigned char keymap[] = {'a' + ASCII_OFFSET, 
+unsigned char keymap[] = {'a' + ASCII_OFFSET,
 						'b' + ASCII_OFFSET,
 						'c' + ASCII_OFFSET,
 						'd' + ASCII_OFFSET,
-						'e' + ASCII_OFFSET,}; 
+						'e' + ASCII_OFFSET,};
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -94,7 +94,7 @@ unsigned int divide_and_round(unsigned int num, unsigned int denom)
 	rounded = (((num << 8) / denom) & 0xFF);
 	if(rounded > 128)
 		rounded = 255 - rounded;
-	
+
 	unsigned int scaled = (num << 1) / denom;					//remove this divide?
 	return (scaled >> 1) + (scaled & 0x1);
 }
@@ -107,14 +107,14 @@ unsigned int get_sw_bitstring_from_raw_slow(unsigned int Vout)
 {
 	//calculate resistance of switches + resistors in parallel
 	unsigned int Rp = (Rc * Vcc) / Vout - Rc;					//REMOVE THIS DIVIDE?
-	
+
 	//convert resistance to bitstring representing switches (needs explanation)
 	unsigned int sw_bitstring = divide_and_round(Rp_MAX, Rp);
-	
+
 	//debug printing
-	//snprintf(aTxBuffer, sizeof(aTxBuffer), "er: %d val: %3d Rp: %10d v: %d\n", rounded, sw_bitstring, Rp, Vout);	
+	//snprintf(aTxBuffer, sizeof(aTxBuffer), "er: %d val: %3d Rp: %10d v: %d\n", rounded, sw_bitstring, Rp, Vout);
 	//_puts(aTxBuffer);
-		
+
 	return sw_bitstring;
 }
 
@@ -133,10 +133,10 @@ void pre_generate_table()
 	for(i = 0; i < 32; i++)
 	{
 		Vout_expected[i] = (unsigned int) Vout_raw_from_sw_bitstring(i);
-		snprintf(aTxBuffer, sizeof(aTxBuffer), "i: %d, v:%d\n", i, Vout_expected[i]);	
+		snprintf(aTxBuffer, sizeof(aTxBuffer), "i: %d, v:%d\n", i, Vout_expected[i]);
 		_puts(aTxBuffer);
 	}
-	
+
 	for(i = 0; i < 31; i++)
 	{
 		Vout_cutoffs[i] = (Vout_expected[i] + Vout_expected[i+1])/2;
@@ -146,7 +146,7 @@ void pre_generate_table()
 
 void get_sw_bitstring_from_Vout(unsigned int i)
 {
-	
+
 }
 
 uint8_t report[HID_REPORT_SIZE] = {0};
@@ -154,9 +154,9 @@ uint8_t report[HID_REPORT_SIZE] = {0};
 int i = 0;
 void interrupt_1ms()
 {
-	//send HID report every 1ms 
+	//send HID report every 1ms
 	Send_Report(report, HID_REPORT_SIZE);
-	
+
 	//clear the report after it's sent
 	int i;
 	for(i = 0; i < HID_REPORT_SIZE; i++)
@@ -164,14 +164,14 @@ void interrupt_1ms()
 		//clear the report
 		report[i] = 0;
 	}
-	
-	i++; 
+
+	i++;
 
 	if(i > 1000)
 		light_on();
 	else
 		light_off();
-	
+
 	if(i > 2000)
 	{
 		i = 0;
@@ -203,33 +203,33 @@ int main(void)
   MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
   MX_TIM14_Init();
-  
+
 
   /* USER CODE BEGIN 2 */
-  
+
   //calibrate the ADC
   HAL_ADCEx_Calibration_Start(&hadc);
-  
+
   //NOTE: DMA configured to load a half word (16 bits) at a time from the ADC
   HAL_ADC_Start_DMA(&hadc, (uint32_t*)ADC1_DMA_buffer, BUFFER_SIZE);
 
   //pre-calculate Vout values:
   pre_generate_table();
-  
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
 
-  
+
   //just before entering loop, start interrrupts
   HAL_TIM_Base_Start_IT(&htim14);
-  
+
   while (1)
   {
 	unsigned int DEV_keypress_bitstring[2] = {0};		//which keys the Device knows are pressed
-	
+
 	int adc_i = 0;
 	//for(adc_i = 0; adc_i < NUMBER_OF_ADC; adc_i++)
 	{
@@ -239,63 +239,63 @@ int main(void)
 		for(index = adc_i; index < BUFFER_SIZE; index += NUMBER_OF_ADC)
 		{
 			Vout += ADC1_DMA_buffer[index];
-		}			
+		}
 		Vout /= SAMPLES_PER_ADC;									//can remove this divide if samples_per_adc is a power of 2
-		
+
 		unsigned char sw_bitstring = get_sw_bitstring_from_raw_slow(Vout);
-		
-		//write into keypress array. for simplicity, do in blocks of 8 bits (even though only 5 bits are actually used) 
+
+		//write into keypress array. for simplicity, do in blocks of 8 bits (even though only 5 bits are actually used)
 		((unsigned char *) DEV_keypress_bitstring)[adc_i] |= sw_bitstring;
-		
+
 	}
-	
+
 	//now all data has been collected from ADCs
 	//find the difference between what the pc thinks they keyboard's state is and what the actual keyboard state is
 	//a '1' in the 'diff' array indicates there is a difference
 	/*unsigned int diff[2];
 	for(i = 0; i < 2; i++)
 	{
-		diff[i] = DEV_keypress_bitstring[i] ^ PC_keypress_bitstring[i]; 	
+		diff[i] = DEV_keypress_bitstring[i] ^ PC_keypress_bitstring[i];
 	}*/
-	
-	//snprintf(aTxBuffer, sizeof(aTxBuffer), "dev: %d pc: %d diff:%d\n", DEV_keypress_bitstring[0], PC_keypress_bitstring[0], diff[0]);	
-	//_puts(aTxBuffer); 
-	
-	//find the first 6 differences. after acknowledging a difference, update the 
-	
-	//now fill in the USB HID Report	
-	int i;	
+
+	//snprintf(aTxBuffer, sizeof(aTxBuffer), "dev: %d pc: %d diff:%d\n", DEV_keypress_bitstring[0], PC_keypress_bitstring[0], diff[0]);
+	//_puts(aTxBuffer);
+
+	//find the first 6 differences. after acknowledging a difference, update the
+
+	//now fill in the USB HID Report
+	int i;
 	for(i = 0; i < 2; i++)
 	{
 		int keysFound;
 		for(keysFound = 0; keysFound < 6; keysFound++)
 		{
-			if(DEV_keypress_bitstring[i] == 0)	//no keys pressed 
+			if(DEV_keypress_bitstring[i] == 0)	//no keys pressed
 				break;
-				
+
 			unsigned int single_one = (unsigned int) (DEV_keypress_bitstring[i] & -DEV_keypress_bitstring[i]);
-			unsigned int bit_index = find_first_set_single_one(single_one);	
-			
+			unsigned int bit_index = find_first_set_single_one(single_one);
+
 			report[keysFound + HID_REPORT_KBD_OFFSET] = keymap[bit_index]; //add to the report
-			
+
 			DEV_keypress_bitstring[i] = single_one ^ DEV_keypress_bitstring[i];	//remove the bit which was just found
 		}
-		
+
 		/*int diff_count;
 		for(diff_count = 0; diff_count < 6; diff_count++)
 		{
 			if(diff[i] == 0)	//no difference between Device and PC's keystate
 				break;
-			
+
 			unsigned int single_one = (unsigned int) (diff[i] & -diff[i]);	//only leaves the rightmost bit
-			unsigned int bit_index = find_first_set_single_one(single_one);						
-			
-			//translate the bit index into a character 
+			unsigned int bit_index = find_first_set_single_one(single_one);
+
+			//translate the bit index into a character
 			report[diff_count + HID_REPORT_KBD_OFFSET] = keymap[bit_index];
-			
-			snprintf(aTxBuffer, sizeof(aTxBuffer), "CHANGE: %d\n", bit_index);	
+
+			snprintf(aTxBuffer, sizeof(aTxBuffer), "CHANGE: %d\n", bit_index);
 			_puts(aTxBuffer);
-			
+
 			//update the PC_keypress_bitstring by xoring it with the single_one value (flip the bit at that bit position):
 			//also remove it from the difference bitstring (strange have to do it twice..)
 			PC_keypress_bitstring[i] = single_one ^ PC_keypress_bitstring[i];
@@ -353,7 +353,7 @@ void MX_ADC_Init(void)
 
   ADC_ChannelConfTypeDef sConfig;
 
-    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) 
+    /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
     */
   hadc.Instance = ADC1;
   hadc.Init.ClockPrescaler = ADC_CLOCK_ASYNC;
@@ -370,44 +370,44 @@ void MX_ADC_Init(void)
   hadc.Init.Overrun = OVR_DATA_OVERWRITTEN;
   HAL_ADC_Init(&hadc);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
   sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
-  
-    /**Configure for the selected ADC regular channel to be converted. 
+
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_1;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_4;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_8;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_10;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_11;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_12;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
 
-    /**Configure for the selected ADC regular channel to be converted. 
+    /**Configure for the selected ADC regular channel to be converted.
     */
   sConfig.Channel = ADC_CHANNEL_13;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
@@ -435,15 +435,15 @@ void MX_USART4_UART_Init(void)
 /* TIM14 init function */
 void MX_TIM14_Init(void)
 {
-	// Reference manual specifies prescaler is actuallly f CK_PSC / (PSC[15:0] + 1). 
-	// This is so that a prescaler of 0 is actually a scaling of 1., 1 is 2 etc. so 
+	// Reference manual specifies prescaler is actuallly f CK_PSC / (PSC[15:0] + 1).
+	// This is so that a prescaler of 0 is actually a scaling of 1., 1 is 2 etc. so
 	// that all the values can be used
 	// see STM32 example code given by ST!
 	unsigned int tickFrequency = 60000;
 	unsigned int interruptFrequency = 1000;
-	unsigned int prescaler = SystemCoreClock / tickFrequency - 1;	
+	unsigned int prescaler = SystemCoreClock / tickFrequency - 1;
 	unsigned int period = tickFrequency / interruptFrequency - 1;	//starts counting from 0, so subtract one
-	
+
   htim14.Instance = TIM14;
   htim14.Init.Prescaler = prescaler;
   htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
@@ -453,10 +453,10 @@ void MX_TIM14_Init(void)
 
 }
 
-/** 
+/**
   * Enable DMA controller clock
   */
-void MX_DMA_Init(void) 
+void MX_DMA_Init(void)
 {
   /* DMA controller clock enable */
   __DMA1_CLK_ENABLE();
@@ -467,9 +467,9 @@ void MX_DMA_Init(void)
 
 }
 
-/** Configure pins as 
-        * Analog 
-        * Input 
+/** Configure pins as
+        * Analog
+        * Input
         * Output
         * EVENT_OUT
         * EXTI
@@ -525,10 +525,10 @@ void assert_failed(uint8_t* file, uint32_t line)
 
 /**
   * @}
-  */ 
+  */
 
 /**
   * @}
-*/ 
+*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
