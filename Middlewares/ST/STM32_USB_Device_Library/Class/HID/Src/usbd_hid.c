@@ -227,7 +227,7 @@ __ALIGN_BEGIN static uint8_t USBD_HID_DeviceQualifierDesc[USB_LEN_DEV_QUALIFIER_
 __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE]  __ALIGN_END =
 {
 	//REMEMBER TO UPDATE HID_MOUSE_REPORT_DESC_SIZE if this is updated!
-		
+	//see Appendix B: Boot Interface Descriptors
 	0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
     0x09, 0x06,                    // USAGE (Keyboard)
     0xa1, 0x01,                    // COLLECTION (Application)
@@ -237,22 +237,22 @@ __ALIGN_BEGIN static uint8_t HID_MOUSE_ReportDesc[HID_MOUSE_REPORT_DESC_SIZE]  _
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
     0x75, 0x01,                    //   REPORT_SIZE (1)				REPORT SIZE 1
-    0x95, 0x08,                    //   REPORT_COUNT (8)	    	RPORT COUNT 8 = 1 byte -> byte 0
+    0x95, 0x08,                    //   REPORT_COUNT (8)	    	RPORT COUNT 8 = 1 byte -> byte 0	MODIFIER BYTE
     0x81, 0x02,                    //   INPUT (Data,Var,Abs)
     0x95, 0x01,                    //   REPORT_COUNT (1)			REPORT COUNT 1 
-    0x75, 0x08,                    //   REPORT_SIZE (8)	        	REPORT SIZE 8 = 1 byte -> byte 1
+    0x75, 0x08,                    //   REPORT_SIZE (8)	        	REPORT SIZE 8 = 1 byte -> byte 1	RESERVED BYTE
     0x81, 0x03,                    //   INPUT (Cnst,Var,Abs)
     0x95, 0x05,                    //   REPORT_COUNT (5)			REPORT COUNT 5
-    0x75, 0x01,                    //   REPORT_SIZE (1)				REPORT SIZE 1 = 5 bits 
+    0x75, 0x01,                    //   REPORT_SIZE (1)				REPORT SIZE 1 = 5 bits -> byte 0 of OUTPUT Report -	LED REPORT
     0x05, 0x08,                    //   USAGE_PAGE (LEDs)
     0x19, 0x01,                    //   USAGE_MINIMUM (Num Lock)
     0x29, 0x05,                    //   USAGE_MAXIMUM (Kana)
     0x91, 0x02,                    //   OUTPUT (Data,Var,Abs)
     0x95, 0x01,                    //   REPORT_COUNT (1)			REPORT COUNT 1
-    0x75, 0x03,                    //   REPORT_SIZE (3)				REPORT SIZE 3 =  3 bits -> byte 3 
+    0x75, 0x03,                    //   REPORT_SIZE (3)				REPORT SIZE 3 =  3 bits -> byte 0 of OUTPUT Report - LED REPORT PADDING
     0x91, 0x03,                    //   OUTPUT (Cnst,Var,Abs)
-    0x95, 0x06,                    //   REPORT_COUNT (6)			REPORT COUNT 6		//should change this to 8 later..
-    0x75, 0x08,                    //   REPORT_SIZE (8)				REPORT SIZE 8 = 6 bytes -> bytes 4-9
+    0x95, 0x06,                    //   REPORT_COUNT (6)			REPORT COUNT 6		
+    0x75, 0x08,                    //   REPORT_SIZE (8)				REPORT SIZE 8 = 6 bytes -> bytes 2-8 - KEYCODE 1-6
     0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
     0x25, 0x65,                    //   LOGICAL_MAXIMUM (101)
     0x05, 0x07,                    //   USAGE_PAGE (Keyboard)

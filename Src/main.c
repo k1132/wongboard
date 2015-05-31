@@ -39,11 +39,21 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "string.h"
+#include "util.h"
+
 #define UART_TIMEOUT 5000
-#define UART_SPEED 115200
+#define UART_SPEED 19200
 #define NUMBER_OF_ADC 8
-#define HID_REPORT_SIZE 10
-#define ASCII_OFFSET 4 - 'a'
+
+#define SAMPLES_PER_ADC 8
+#define BUFFER_SIZE (NUMBER_OF_ADC*SAMPLES_PER_ADC)
+
+#define HID_REPORT_SIZE 10		//total size of the keyboard report
+#define HID_REPORT_KBD_OFFSET	4 		//which byte the keyboard keypresses starts at	
+#define ASCII_OFFSET (4 - 'a')	//convert ASCII char into HID report by adding this offset: ie 'c' would be = 'c' + ASCII_OFFSET
+
+#define VCC 5
+#define R2 1000
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -53,8 +63,7 @@ UART_HandleTypeDef huart4;
 
 /* USER CODE BEGIN PV */
 char aTxBuffer[50];
-uint16_t ADC1_DMA_buffer[NUMBER_OF_ADC];
-uint8_t report[HID_REPORT_SIZE];
+uint16_t ADC1_DMA_buffer[BUFFER_SIZE];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -83,8 +92,68 @@ void _puts(char * str)
 	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
 }
 
-//report should be 
+int rounded;
 
+//behaves like (unsigned int) ((float) Rp_MAX / (float) Rp) except only works with unsigned ints.
+unsigned int divide_and_round(unsigned int num, unsigned int denom)
+{
+	rounded = (((num << 8) / denom) & 0xFF);
+	if(rounded > 128)
+		rounded = 255 - rounded;
+	
+	unsigned int scaled = (num << 1) / denom;					//remove this divide?
+	return (scaled >> 1) + (scaled & 0x1);
+}
+
+unsigned int Rc = 2694 + -100; //1045; //acutal 1016
+unsigned int Vcc = 4095 * 511 / 330;		//Vcc is 5v - actually 5.11V!, but ADC only goes to 3.3v
+unsigned int Rp_MAX = 80000;	//highest resistor
+
+unsigned int get_sw_bitstring_from_raw_slow(unsigned int Vout)
+{
+	//calculate resistance of switches + resistors in parallel
+	unsigned int Rp = (Rc * Vcc) / Vout - Rc;					//REMOVE THIS DIVIDE?
+	
+	//convert resistance to bitstring representing switches (needs explanation)
+	unsigned int sw_bitstring = divide_and_round(Rp_MAX, Rp);
+	
+	//debug printing
+	//snprintf(aTxBuffer, sizeof(aTxBuffer), "er: %d val: %3d Rp: %10d v: %d\n", rounded, sw_bitstring, Rp, Vout);	
+	//_puts(aTxBuffer);
+		
+	return sw_bitstring;
+}
+
+//maybe use floating point for all these calculations even though slower since this is only done once?
+float Vout_raw_from_sw_bitstring(float sw_bitstring)
+{
+	float Rp = Rp_MAX / sw_bitstring;
+	return (Vcc * Rc) / (Rp + Rc); 				//Vcc raw
+}
+
+unsigned int Vout_expected[32];
+unsigned int Vout_cutoffs[31];
+void pre_generate_table()
+{
+	int i;
+	for(i = 0; i < 32; i++)
+	{
+		Vout_expected[i] = (unsigned int) Vout_raw_from_sw_bitstring(i);
+		snprintf(aTxBuffer, sizeof(aTxBuffer), "i: %d, v:%d\n", i, Vout_expected[i]);	
+		_puts(aTxBuffer);
+	}
+	
+	for(i = 0; i < 31; i++)
+	{
+		Vout_cutoffs[i] = (Vout_expected[i] + Vout_expected[i+1])/2;
+	}
+
+}
+
+void get_sw_bitstring_from_Vout(unsigned int i)
+{
+	
+}
 
 /* USER CODE END 0 */
 
@@ -111,36 +180,111 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   /* USER CODE BEGIN 2 */
+  
+  //calibrate the ADC
+  HAL_ADCEx_Calibration_Start(&hadc);
+  
   //NOTE: DMA configured to load a half word (16 bits) at a time from the ADC
-  HAL_ADC_Start_DMA(&hadc, (uint32_t*)ADC1_DMA_buffer, NUMBER_OF_ADC);
+  HAL_ADC_Start_DMA(&hadc, (uint32_t*)ADC1_DMA_buffer, BUFFER_SIZE);
+
+  //pre-calculate Vout values:
+  pre_generate_table();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  
+  //each bit represents a key is currently pressed/not pressed
+  unsigned char keymap[] = {'a' + ASCII_OFFSET, 
+							'b' + ASCII_OFFSET,
+							'c' + ASCII_OFFSET,
+							'd' + ASCII_OFFSET,
+							'e' + ASCII_OFFSET,}; 
+  
+  
+  unsigned int PC_keypress_bitstring[2] = {0};	//which keys the PC thinks are pressed
+  
   while (1)
   {
-	int i;
-	for(i = 0; i < NUMBER_OF_ADC; i++)
-	{
-		snprintf(aTxBuffer, sizeof(aTxBuffer), "%d ", ADC1_DMA_buffer[i]);	
-		_puts(aTxBuffer);
-	}
-	_puts("\n");
+	uint8_t report[HID_REPORT_SIZE] = {0};
+	unsigned int DEV_keypress_bitstring[2] = {0};		//which keys the Device knows are pressed
 	
-	//Send_Report(report, REPORT_SIZE)
-	light_off();
-	if(ADC1_DMA_buffer[0] < 200)//> 0x200)
+	int adc_i = 0;
+	//for(adc_i = 0; adc_i < NUMBER_OF_ADC; adc_i++)
 	{
-		report[4] = 'c' + ASCII_OFFSET; 
-		Send_Report(report, HID_REPORT_SIZE);
-		i++;	
-		light_on();
+		//Calculate average voltage (should really do median
+		unsigned int Vout = 0;
+		int index;
+		for(index = adc_i; index < BUFFER_SIZE; index += NUMBER_OF_ADC)
+		{
+			Vout += ADC1_DMA_buffer[index];
+		}			
+		Vout /= SAMPLES_PER_ADC;									//can remove this divide if samples_per_adc is a power of 2
+		
+		unsigned char sw_bitstring = get_sw_bitstring_from_raw_slow(Vout);
+		
+		//write into keypress array. for simplicity, do in blocks of 8 bits (even though only 5 bits are actually used) 
+		((unsigned char *) DEV_keypress_bitstring)[adc_i] |= sw_bitstring;
+		
 	}
-	else 
+	
+	//now all data has been collected from ADCs
+	//find the difference between what the pc thinks they keyboard's state is and what the actual keyboard state is
+	//a '1' in the 'diff' array indicates there is a difference
+	/*unsigned int diff[2];
+	for(i = 0; i < 2; i++)
 	{
-		report[4] = 0;
-		Send_Report(report, HID_REPORT_SIZE);
+		diff[i] = DEV_keypress_bitstring[i] ^ PC_keypress_bitstring[i]; 	
+	}*/
+	
+	//snprintf(aTxBuffer, sizeof(aTxBuffer), "dev: %d pc: %d diff:%d\n", DEV_keypress_bitstring[0], PC_keypress_bitstring[0], diff[0]);	
+	//_puts(aTxBuffer); 
+	
+	//find the first 6 differences. after acknowledging a difference, update the 
+	int i;
+	for(i = 0; i < 2; i++)
+	{
+		int keysFound;
+		for(keysFound = 0; keysFound < 6; keysFound++)
+		{
+			if(DEV_keypress_bitstring[i] == 0)	//no keys pressed 
+				break;
+				
+			unsigned int single_one = (unsigned int) (DEV_keypress_bitstring[i] & -DEV_keypress_bitstring[i]);
+			unsigned int bit_index = find_first_set_single_one(single_one);	
+			
+			report[keysFound + HID_REPORT_KBD_OFFSET] = keymap[bit_index]; //add to the report
+			
+			DEV_keypress_bitstring[i] = single_one ^ DEV_keypress_bitstring[i];	//remove the bit which was just found
+		}
+		
+		/*int diff_count;
+		for(diff_count = 0; diff_count < 6; diff_count++)
+		{
+			if(diff[i] == 0)	//no difference between Device and PC's keystate
+				break;
+			
+			unsigned int single_one = (unsigned int) (diff[i] & -diff[i]);	//only leaves the rightmost bit
+			unsigned int bit_index = find_first_set_single_one(single_one);						
+			
+			//translate the bit index into a character 
+			report[diff_count + HID_REPORT_KBD_OFFSET] = keymap[bit_index];
+			
+			snprintf(aTxBuffer, sizeof(aTxBuffer), "CHANGE: %d\n", bit_index);	
+			_puts(aTxBuffer);
+			
+			//update the PC_keypress_bitstring by xoring it with the single_one value (flip the bit at that bit position):
+			//also remove it from the difference bitstring (strange have to do it twice..)
+			PC_keypress_bitstring[i] = single_one ^ PC_keypress_bitstring[i];
+			diff[i] = single_one ^ diff[i];
+		}*/
 	}
+
+	//after the HID report is filled, send the report
+	Send_Report(report, HID_REPORT_SIZE);
+
+	HAL_Delay(10);
   }
   /* USER CODE END WHILE */
 
@@ -214,7 +358,7 @@ void MX_ADC_Init(void)
   sConfig.Rank = ADC_RANK_CHANNEL_NUMBER;
   sConfig.SamplingTime = ADC_SAMPLETIME_239CYCLES_5;
   HAL_ADC_ConfigChannel(&hadc, &sConfig);
-
+  
     /**Configure for the selected ADC regular channel to be converted. 
     */
   sConfig.Channel = ADC_CHANNEL_1;
@@ -257,7 +401,7 @@ void MX_USART4_UART_Init(void)
 {
 
   huart4.Instance = USART4;
-  huart4.Init.BaudRate = 115200;
+  huart4.Init.BaudRate = UART_SPEED;
   huart4.Init.WordLength = UART_WORDLENGTH_8B;
   huart4.Init.StopBits = UART_STOPBITS_1;
   huart4.Init.Parity = UART_PARITY_NONE;
