@@ -2,6 +2,7 @@
 
 ## Current status
 
+- Basic prototype working, need to implement transition detection (equivalent to switch bounce on normal keyboards)
 - Started project (blink a light). That's about half way there right?
 
 STM32 based keyboard firmware/hardware for STM32F0x2 processors (although any STM32 with usb should work too). This is my first project using the STM32 series of MCU's.
@@ -13,9 +14,18 @@ The project uses the HAL library, although a version without HAL is coming soon.
 If you are using a different MCU, you should regenerate the 'Drivers' folder by making a new project using STM32Cube. Make sure to select 'SW4STM' to get the correct .ld (linker config) files.
 
 Todo: 
-- make proper readme file
-- get some sort of debugging working
+- make proper readme.md file
+- fix python build script so it doesn't rebuild everything every time...
+- (Optional) Figure out how to use the USB PLL as clock source so external clock not required
 
+Hardware Todo:
+- Figure out which voltage regulator(s) to use (usb 5V not well regulated on most computers?)
+- Figure out how to mount the switches nicely
+- Do circuit board design
 
 Useful links:
 - STM32 HAL Usb library documentation http://www.st.com/st-web-ui/static/active/en/resource/technical/document/user_manual/DM00108129.pdf
+
+Known Drawbacks:
+- If a key is pressed for less than 1 millisecond it won't be registered (not sure how most other keyboard manufacturers deal with this)
+- Threshold values for keypresses are not calibrated, instead they are guessed based on the resistor values. Need to implement this later.
