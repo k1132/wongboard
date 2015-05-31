@@ -10,6 +10,10 @@
 #define DEBRUIJN32 0x077CB531UL  //debruijn32 = 0000 0111 0111 1100 1011 0101 0011 0001 
 #define DEBRUIJN_RSHIFT (32 - 5) //each value extracted from the constant is 5 bits
 
+#define UART_TIMEOUT 5000
+
+extern UART_HandleTypeDef huart4;
+
 unsigned int DEBRUIJN32_TABLE[32] = 
 { 0,  1,  28,  2,  29,  14,  24,  3, 
 30, 22,  20, 15,  25,  17,   4,  8, 

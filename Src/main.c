@@ -42,7 +42,6 @@
 #include "util.h"
 #include "main.h"
 
-#define UART_TIMEOUT 5000
 #define UART_SPEED 19200
 #define NUMBER_OF_ADC 8
 
@@ -55,6 +54,13 @@
 
 #define VCC 5
 #define R2 1000
+
+//each bit represents a key is currently pressed/not pressed
+unsigned char keymap[] = {'a' + ASCII_OFFSET, 
+						'b' + ASCII_OFFSET,
+						'c' + ASCII_OFFSET,
+						'd' + ASCII_OFFSET,
+						'e' + ASCII_OFFSET,}; 
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -197,6 +203,7 @@ int main(void)
   MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
   MX_TIM14_Init();
+  
 
   /* USER CODE BEGIN 2 */
   
@@ -208,27 +215,19 @@ int main(void)
 
   //pre-calculate Vout values:
   pre_generate_table();
+  
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+
   
   //just before entering loop, start interrrupts
-  //each bit represents a key is currently pressed/not pressed
-  unsigned char keymap[] = {'a' + ASCII_OFFSET, 
-							'b' + ASCII_OFFSET,
-							'c' + ASCII_OFFSET,
-							'd' + ASCII_OFFSET,
-							'e' + ASCII_OFFSET,}; 
-  
-  
-  unsigned int PC_keypress_bitstring[2] = {0};	//which keys the PC thinks are pressed
   HAL_TIM_Base_Start_IT(&htim14);
   
   while (1)
   {
-	uint8_t report[HID_REPORT_SIZE] = {0};
 	unsigned int DEV_keypress_bitstring[2] = {0};		//which keys the Device knows are pressed
 	
 	int adc_i = 0;
@@ -263,7 +262,9 @@ int main(void)
 	//_puts(aTxBuffer); 
 	
 	//find the first 6 differences. after acknowledging a difference, update the 
-	int i;
+	
+	//now fill in the USB HID Report	
+	int i;	
 	for(i = 0; i < 2; i++)
 	{
 		int keysFound;
