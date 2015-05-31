@@ -49,7 +49,7 @@
 #define BUFFER_SIZE (NUMBER_OF_ADC*SAMPLES_PER_ADC)
 
 #define HID_REPORT_SIZE 10		//total size of the keyboard report
-#define HID_REPORT_KBD_OFFSET	4 		//which byte the keyboard keypresses starts at	
+#define HID_REPORT_KBD_OFFSET	3 		//which byte the keyboard keypresses starts at	
 #define ASCII_OFFSET (4 - 'a')	//convert ASCII char into HID report by adding this offset: ie 'c' would be = 'c' + ASCII_OFFSET
 
 #define VCC 5
