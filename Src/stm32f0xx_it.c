@@ -35,6 +35,8 @@
 #include "stm32f0xx_hal.h"
 #include "stm32f0xx.h"
 #include "stm32f0xx_it.h"
+#include "util.h"
+#include "main.h"
 
 /* USER CODE BEGIN 0 */
 
@@ -43,6 +45,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_FS;
 extern DMA_HandleTypeDef hdma_adc;
+extern TIM_HandleTypeDef htim14;
 
 /******************************************************************************/
 /*            Cortex-M0 Processor Interruption and Exception Handlers         */ 
@@ -90,6 +93,21 @@ void USB_IRQHandler(void)
   /* USER CODE BEGIN USB_IRQn 1 */
 
   /* USER CODE END USB_IRQn 1 */
+}
+
+
+/**
+* @brief This function handles TIM14 global interrupt.
+*/
+void TIM14_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM14_IRQn 0 */
+  
+  /* USER CODE END TIM14_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim14);
+  /* USER CODE BEGIN TIM14_IRQn 1 */	
+	interrupt_1ms();
+  /* USER CODE END TIM14_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

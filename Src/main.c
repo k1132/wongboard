@@ -60,6 +60,7 @@
 ADC_HandleTypeDef hadc;
 DMA_HandleTypeDef hdma_adc;
 UART_HandleTypeDef huart4;
+TIM_HandleTypeDef htim14;
 
 /* USER CODE BEGIN PV */
 char aTxBuffer[50];
@@ -72,6 +73,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_ADC_Init(void);
 static void MX_USART4_UART_Init(void);
+static void MX_TIM14_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* USER CODE END PFP */
@@ -163,6 +165,7 @@ int main(void)
   MX_ADC_Init();
   MX_USART4_UART_Init();
   MX_USB_DEVICE_Init();
+  MX_TIM14_Init();
 
   /* USER CODE BEGIN 2 */
   
@@ -180,6 +183,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   
+  //just before entering loop, start interrrupts
   //each bit represents a key is currently pressed/not pressed
   unsigned char keymap[] = {'a' + ASCII_OFFSET, 
 							'b' + ASCII_OFFSET,
@@ -189,6 +193,7 @@ int main(void)
   
   
   unsigned int PC_keypress_bitstring[2] = {0};	//which keys the PC thinks are pressed
+  HAL_TIM_Base_Start_IT(&htim14);
   
   while (1)
   {
@@ -396,6 +401,27 @@ void MX_USART4_UART_Init(void)
   huart4.Init.OneBitSampling = UART_ONEBIT_SAMPLING_DISABLED ;
   huart4.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
   HAL_UART_Init(&huart4);
+
+}
+
+/* TIM14 init function */
+void MX_TIM14_Init(void)
+{
+	// Reference manual specifies prescaler is actuallly f CK_PSC / (PSC[15:0] + 1). 
+	// This is so that a prescaler of 0 is actually a scaling of 1., 1 is 2 etc. so 
+	// that all the values can be used
+	// see STM32 example code given by ST!
+	unsigned int tickFrequency = 60000;
+	unsigned int interruptFrequency = 1000;
+	unsigned int prescaler = SystemCoreClock / tickFrequency - 1;	
+	unsigned int period = tickFrequency / interruptFrequency - 1;	//starts counting from 0, so subtract one
+	
+  htim14.Instance = TIM14;
+  htim14.Init.Prescaler = prescaler;
+  htim14.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim14.Init.Period = period;
+  htim14.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
+  HAL_TIM_Base_Init(&htim14);
 
 }
 
