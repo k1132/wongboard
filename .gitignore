@@ -34,3 +34,6 @@
 
 # Other [may cause conflict if using the D programming language...]
 *.d
+*.tmp
+*.ftl
+*.ftl_save
