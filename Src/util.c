@@ -1,4 +1,7 @@
 #include "util.h"
+#include "stm32f0xx_hal.h"
+#include "stdio.h"
+#include "string.h"
 
 //See http://supertech.csail.mit.edu/papers/debruijn.pdf, paper explains nicely how it works (it's very simple!)
 //http://en.wikipedia.org/wiki/Find_first_set#FFS
@@ -32,4 +35,19 @@ unsigned int find_first_set(unsigned int num)
 	unsigned int single_one = (unsigned int) (num & -num);
 	
 	return find_first_set_single_one(single_one);
+}
+
+void light_on()
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
+}
+
+void light_off()
+{
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
+}
+
+void _puts(char * str)
+{
+	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
 }

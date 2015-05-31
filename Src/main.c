@@ -77,21 +77,6 @@ static void MX_USART4_UART_Init(void);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
-void light_on()
-{
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_SET);
-}
-
-void light_off()
-{
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);
-}
-
-void _puts(char * str)
-{
-	HAL_UART_Transmit(&huart4, (uint8_t*)str, strlen(str), UART_TIMEOUT);
-}
-
 int rounded;
 
 //behaves like (unsigned int) ((float) Rp_MAX / (float) Rp) except only works with unsigned ints.
