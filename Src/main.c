@@ -40,6 +40,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "util.h"
+#include "main.h"
 
 #define UART_TIMEOUT 5000
 #define UART_SPEED 19200
@@ -140,6 +141,36 @@ void pre_generate_table()
 void get_sw_bitstring_from_Vout(unsigned int i)
 {
 	
+}
+
+uint8_t report[HID_REPORT_SIZE] = {0};
+
+int i = 0;
+void interrupt_1ms()
+{
+	//send HID report every 1ms 
+	Send_Report(report, HID_REPORT_SIZE);
+	
+	//clear the report after it's sent
+	int i;
+	for(i = 0; i < HID_REPORT_SIZE; i++)
+	{
+		//clear the report
+		report[i] = 0;
+	}
+	
+	i++; 
+
+	if(i > 1000)
+		light_on();
+	else
+		light_off();
+	
+	if(i > 2000)
+	{
+		i = 0;
+		//_puts("running!");
+	}
 }
 
 /* USER CODE END 0 */
@@ -271,10 +302,6 @@ int main(void)
 		}*/
 	}
 
-	//after the HID report is filled, send the report
-	Send_Report(report, HID_REPORT_SIZE);
-
-	HAL_Delay(10);
   }
   /* USER CODE END WHILE */
 
